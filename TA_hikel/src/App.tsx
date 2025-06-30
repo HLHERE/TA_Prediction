@@ -57,7 +57,12 @@ const App: React.FC = () => {
             <InputForm onSubmit={handleSubmit} isLoading={isLoading} />
           </div>
           <div>
-            <ResultsDisplay result={predictionResult} isLoading={isLoading} error={error} />
+            <ResultsDisplay
+              data={{}} // TODO: Replace with actual data if available
+              result={predictionResult}
+              isLoading={isLoading}
+              error={error}
+            />
           </div>
         </div>
       </main>
