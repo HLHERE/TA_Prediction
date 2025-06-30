@@ -17,7 +17,6 @@ import type { ChartOptions } from 'chart.js';
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 interface ResultsDisplayProps {
-  data: Record<string, number>;
   result: FactorBasedPrediction | null;
   isLoading: boolean;
   error: string | null;

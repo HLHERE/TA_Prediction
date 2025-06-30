@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import Navbar from './assets/Navbar';
 import InputForm from './assets/InputForm';
@@ -58,7 +57,6 @@ const App: React.FC = () => {
           </div>
           <div>
             <ResultsDisplay
-              data={{}} // TODO: Replace with actual data if available
               result={predictionResult}
               isLoading={isLoading}
               error={error}

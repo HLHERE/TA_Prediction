@@ -10,7 +10,11 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=["http://localhost:5173"])
+CORS(app, supports_credentials=True, origins=[
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://192.168.10.253:3000"
+])
 
 # Load the trained pipeline (including encoders and model)
 pipeline = joblib.load('file_joblib/pipeline_with_best_model.joblib')
@@ -170,6 +174,14 @@ def predict_json():
     except Exception as e:
         print("❌ ERROR:", e)
         return jsonify({'error': str(e)}), 400
+
+@app.errorhandler(400)
+def bad_request(e):
+    return jsonify({'error': str(e)}), 400
+
+@app.errorhandler(500)
+def server_error(e):
+    return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

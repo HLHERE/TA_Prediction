@@ -43,7 +43,6 @@ instance/
 .ipynb_checkpoints/
 
 # Model & Data
-*.joblib
 *.h5
 *.pkl
 *.csv
