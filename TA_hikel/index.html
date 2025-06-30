@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Predict Participant Score</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class', // Enable class-based dark mode
+      theme: {
+        extend: {
+          colors: {
+            primary: '#4743ca', // Main accent color
+            accent1: '#d16428', // Dark mode gradient start
+            accent2: '#000000', // Dark mode gradient end
+            
+            // Light mode specific gradient colors (as per user request)
+            lm_gradient_start: '#4743ca',
+            lm_gradient_via: '#f1f5f9', // slate-100
+            lm_gradient_end: '#ffffff',
+          },
+          boxShadow: {
+            'top': '0 -4px 6px -1px rgb(0 0 0 / 0.1), 0 -2px 4px -2px rgb(0 0 0 / 0.1)',
+          }
+        }
+      }
+    }
+  </script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/"
+  }
+}
+</script>
+<script>
+  // Initialize theme ASAP to avoid FOUC (Flash of Unstyled Content)
+  (function() {
+    const theme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (theme === 'dark' || (!theme && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  })();
+</script>
+</head>
+<body class="bg-gradient-to-br from-lm_gradient_start via-lm_gradient_via to-lm_gradient_end text-slate-800 dark:from-accent1 dark:via-gray-900 dark:to-accent2 dark:text-gray-100 transition-colors duration-300">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

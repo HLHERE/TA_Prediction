@@ -1,0 +1,55 @@
+# Node.js / React / Vite
+node_modules/
+dist/
+build/
+.vite/
+.env
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor/OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.egg-info/
+.env/
+.venv/
+venv/
+ENV/
+env/
+pip-log.txt
+
+# Flask
+instance/
+*.log
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Model & Data
+*.joblib
+*.h5
+*.pkl
+*.csv
+
+# Misc
+coverage/
+*.bak
+*.orig
+*.rej
