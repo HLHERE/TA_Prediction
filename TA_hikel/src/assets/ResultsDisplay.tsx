@@ -300,7 +300,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoading, erro
           {(() => {
             const factorMap: Record<string, number[]> = {};
             result.inputData.forEach((row, idx) => {
-              const key = row["Provinsi_Target"] || 'Tidak Diketahui';
+              const key = row["Provinsi_Target"] || 'Tidak Diketahui'; // ✅ Gunakan nama provinsi, bukan target
               if (!factorMap[key]) factorMap[key] = [];
               if (result.predictions) {
                 if (result.predictions) {
