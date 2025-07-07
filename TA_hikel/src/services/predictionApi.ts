@@ -15,12 +15,10 @@ const handleFetchError = async (response: Response) => {
         let errorMessage = 'An error occurred';
         try {
             const errorData = await response.json();
-            // Try to get error from 'error' or 'message' field
             errorMessage = errorData.error || errorData.message || errorMessage;
         } catch {
             errorMessage = response.statusText || errorMessage;
         }
-        // Log the error message for debugging
         console.error('API Error:', errorMessage);
         throw new Error(errorMessage);
     }

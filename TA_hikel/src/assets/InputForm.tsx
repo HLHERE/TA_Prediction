@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 
 interface InputFormProps {
@@ -74,6 +73,30 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
     }
   };
   
+  const downloadTemplateCSV = () => {
+    const headers = [
+      'Kelahiran Kabupaten/Kota_peserta',
+      'Umur',
+      'Status Nikah',
+      'Gol_Ruang',
+      'Kelahiran Provinsi'
+    ].join(',');
+    const sample = [
+      'Bandung,35,Menikah,III/A,Jawa Barat',
+      'Jakarta Selatan,28,Belum Menikah,II/C,DKI Jakarta'
+    ].join('\n');
+    const csv = `${headers}\n${sample}`;
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'template_data_peserta.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const labelBaseClass = "block text-sm font-medium mb-1";
   const lightLabelClass = "text-slate-700";
   const darkLabelClass = "dark:text-gray-300";
@@ -118,7 +141,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
                       className="relative cursor-pointer bg-white dark:bg-slate-700 rounded-md font-medium text-primary hover:text-opacity-80 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary dark:focus-within:ring-offset-slate-800"
                     >
                       <span>Unggah file</span>
-                      <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".csv" disabled={isLoading} />
+                      <input id="file-upload" name="file-upload" type="file" accept=".csv,.xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm" onChange={handleFileChange} disabled={isLoading} className="sr-only" />
                     </label>
                     <p className="pl-1">atau tarik dan lepas</p>
                   </div>
@@ -166,6 +189,17 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
           )}
         </button>
       </form>
+      <div className="mt-4 text-center">
+        <button
+          onClick={downloadTemplateCSV}
+          className="mb-3 px-3 py-2 bg-primary text-white rounded hover:bg-primary-dark transition"
+        >
+          Download Template CSV
+        </button>
+      </div>
+      <ul className="text-xs text-slate-600 dark:text-slate-400 mb-2">
+        <li>Kolom wajib: Kelahiran Kabupaten/Kota_peserta, Umur, Status Nikah, Gol_Ruang, Kelahiran Provinsi</li>
+      </ul>
     </div>
   );
 };

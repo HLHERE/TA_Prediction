@@ -11,8 +11,10 @@ import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True, origins=[
+    "http://localhost:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
     "http://192.168.10.253:3000"
 ])
 
@@ -141,7 +143,6 @@ def predict_csv():
         filename = file.filename.lower()
         # Deteksi tipe file
         if filename.endswith('.csv'):
-            # Coba auto-detect delimiter (koma atau titik koma)
             content = file.read()
             try:
                 df = pd.read_csv(io.BytesIO(content), encoding='utf-8')
@@ -153,6 +154,14 @@ def predict_csv():
             df = pd.read_excel(file)
         else:
             return jsonify({'error': 'Format file tidak didukung. Upload file CSV, XLS, atau XLSX.'}), 400
+
+        # --- Tambahkan validasi kolom di sini ---
+        REQUIRED_COLUMNS = [
+            'Kelahiran Kabupaten/Kota_peserta', 'Umur', 'Status Nikah', 'Gol_Ruang', 'Kelahiran Provinsi'
+        ]
+        missing = [col for col in REQUIRED_COLUMNS if col not in df.columns]
+        if missing:
+            return jsonify({'error': f'Format data tidak sesuai. Kolom wajib: {REQUIRED_COLUMNS}. Kolom kurang: {missing}'}), 400
 
         print("✅ Data masuk:", df.columns.tolist())
         result = preprocess_and_predict(df)
