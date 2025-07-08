@@ -302,13 +302,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoading, erro
             result.inputData.forEach((row, idx) => {
               const key = row["Provinsi_Target"] || 'Tidak Diketahui'; // ✅ Gunakan nama provinsi, bukan target
               if (!factorMap[key]) factorMap[key] = [];
-              if (result.predictions) {
-                if (result.predictions) {
-                  if (result.predictions) {
-                    factorMap[key].push(result.predictions[idx]);
-                  }
-                }
-              }
+          factorMap[key].push(result.predictions![idx]);
             });
             const labels = Object.keys(factorMap);
             const avgPredictions = labels.map(label => {

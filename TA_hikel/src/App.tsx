@@ -31,10 +31,9 @@ const App: React.FC = () => {
     <div className="flex flex-col min-h-screen">
       <Navbar
         logoSrcs={[
-          'public/Logo_PT_Kereta_Api_Indonesia_(Persero)_2020.svg.png',
-          'public/Logo_Unpas_Retouch_2021.png',
-          'public/3CrR7mBVQQyiDKES92vF_aNY3dXriT319u2mF.png'
-          
+          '/Logo_PT_Kereta_Api_Indonesia_(Persero)_2020.svg.png',
+          '/Logo_Unpas_Retouch_2021.png',
+          '/3CrR7mBVQQyiDKES92vF_aNY3dXriT319u2mF.png'
         ]}
       />
       <main className="flex-grow container mx-auto px-4 py-6 sm:py-8">
@@ -95,5 +94,3 @@ export default App;
 // }
 
 // export default App
-
-
