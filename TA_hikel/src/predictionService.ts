@@ -100,10 +100,6 @@ export const getPredictionFromCsvFile = async (file: File): Promise<FactorBasedP
       },
       inputData,
       predictions, // <-- Tambahkan ini agar predictions tersedia di frontend
-      // Pass through additional data from the API response to be used in the UI
-      feature_importance: apiResponse.feature_importance,
-      comparison: apiResponse.comparison,
-      summary_error: apiResponse.summary_error,
     };
 
     return result;

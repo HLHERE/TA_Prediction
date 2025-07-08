@@ -19,8 +19,15 @@ const App: React.FC = () => {
       const result = await getPredictionFromCsvFile(file);
       setPredictionResult(result);
     } catch (err) {
-      setError('Gagal mendapatkan prediksi dari file CSV. Pastikan format file benar dan coba lagi.');
-      console.error(err);
+      // Tampilkan pesan error yang lebih spesifik dari backend
+      const genericMessage = 'Gagal memproses file CSV. Pastikan format file dan kolomnya sesuai dengan template.';
+      if (err instanceof Error) {
+        // Menampilkan pesan error spesifik dari API
+        setError(`${genericMessage} Detail: ${err.message}`);
+      } else {
+        setError(genericMessage);
+      }
+      console.error("Detailed error from API:", err);
     } finally {
       setIsLoading(false);
     }

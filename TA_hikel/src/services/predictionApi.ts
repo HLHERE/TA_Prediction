@@ -1,30 +1,70 @@
-import type { ApiResponse } from '../types/prediction';
+import type { PredictionResponse } from '../types/prediction';
 
-// Ambil base URL dari environment variables. Vite akan otomatis memilih
-// file .env yang tepat (development atau production) saat build.
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_URL = 'http://127.0.0.1:5000';
 
-if (!API_BASE_URL) {
-  throw new Error("VITE_API_BASE_URL is not defined. Please check your .env file.");
+interface PredictionInput {
+    'Kelahiran Kabupaten/Kota_peserta': string;
+    'Umur': number;
+    'Status Nikah': string;
+    'Gol_Ruang': string;
+    'Kelahiran Provinsi': string;
 }
 
-/**
- * Mengirim file CSV ke backend API untuk prediksi.
- * @param file File CSV yang akan dianalisis.
- * @returns Promise yang resolve dengan data JSON dari API.
- */
-export const predictFromCSV = async (file: File): Promise<ApiResponse> => {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const response = await fetch(`${API_BASE_URL}/predict`, {
-    method: 'POST',
-    body: formData,
-  });
-
-  if (!response.ok) {
-    throw new Error(`API request failed with status ${response.status}`);
-  }
-
-  return response.json();
+const handleFetchError = async (response: Response) => {
+    if (!response.ok) {
+        let errorMessage = 'An error occurred';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch {
+            errorMessage = response.statusText || errorMessage;
+        }
+        console.error('API Error:', errorMessage);
+        throw new Error(errorMessage);
+    }
+    return response;
 };
+
+export const predictScore = async (formData: PredictionInput): Promise<PredictionResponse> => {
+    try {
+        const response = await fetch(`${API_URL}/predict`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include',
+            mode: 'cors',
+            body: JSON.stringify(formData),
+        });
+
+        await handleFetchError(response);
+        return response.json();
+    } catch (error) {
+        console.error('Prediction error:', error);
+        throw error;
+    }
+};
+
+export const predictFromCSV = async (file: File): Promise<PredictionResponse> => {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(`${API_URL}/predict-csv`, {
+            method: 'POST',
+            credentials: 'include',
+            mode: 'cors',
+            body: formData,
+        });
+
+        await handleFetchError(response);
+        return response.json();
+    } catch (error) {
+        console.error('CSV processing error:', error);
+        throw error;
+    }
+};
+
+
+

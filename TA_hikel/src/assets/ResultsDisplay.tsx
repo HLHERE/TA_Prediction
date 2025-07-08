@@ -81,65 +81,40 @@ const SortedBarChart: React.FC<{
   );
 };
 
-// Komponen visualisasi rata-rata prediksi per kategori faktor
-const FactorPredictionBarChart: React.FC<{ data: PredictionFormData[], predictions: number[], factorKey: string, title: string }> = ({ data, predictions, factorKey, title }) => {
-  if (!data || !predictions || data.length === 0 || predictions.length === 0) return null;
+/**
+ * Helper function to group data by a key, calculate the average prediction for each group.
+ * @param data The input data rows.
+ * @param predictions The array of prediction values.
+ * @param getGroupKey A function that returns a group key for a given data row.
+ * @param predefinedGroups Optional array of groups to maintain a specific order.
+ * @returns An object with sorted labels and their corresponding average prediction values.
+ */
+const groupAndAveragePredictions = (
+  data: PredictionFormData[],
+  predictions: number[],
+  getGroupKey: (row: PredictionFormData) => string,
+  predefinedGroups?: string[]
+) => {
   const factorMap: Record<string, number[]> = {};
-  data.forEach((row, idx) => {
-    const key = ((row as unknown) as Record<string, unknown>)[factorKey] as string || 'Tidak Diketahui';
-    if (!factorMap[key]) factorMap[key] = [];
-    factorMap[key].push(predictions[idx]);
-  });
-  const labels = Object.keys(factorMap);
-  const avgPredictions = labels.map(label => {
-    const arr = factorMap[label];
-    return arr.reduce((a, b) => a + b, 0) / arr.length;
-  });
-  const bgColors = labels.map((_, i) => chartColors[i % chartColors.length]);
-  return (
-    <div style={{ height: 220 }}>
-      <Bar
-        data={{
-          labels,
-          datasets: [{
-            label: 'Rata-rata Prediksi Nilai',
-            data: avgPredictions,
-            backgroundColor: bgColors,
-          }]
-        }}
-        options={{
-          plugins: { legend: { display: false } },
-          scales: { x: { title: { display: true, text: title } }, y: { title: { display: true, text: 'Rata-rata Prediksi' }, beginAtZero: true } },
-          maintainAspectRatio: false
-        }}
-      />
-    </div>
-  );
-};
 
-// Komponen Feature Importance
-const FeatureImportanceBarChart: React.FC<{ importance: Record<string, number> }> = ({ importance }) => {
-  const labels = Object.keys(importance);
-  const values = Object.values(importance);
-  return (
-    <div style={{ height: 220 }}>
-      <Bar
-        data={{
-          labels,
-          datasets: [{
-            label: 'Importance',
-            data: values,
-            backgroundColor: 'rgba(251,191,36,0.7)',
-          }]
-        }}
-        options={{
-          plugins: { legend: { display: false } },
-          scales: { x: { title: { display: true, text: 'Fitur' } }, y: { title: { display: true, text: 'Importance' }, beginAtZero: true } },
-          maintainAspectRatio: false
-        }}
-      />
-    </div>
-  );
+  data.forEach((row, idx) => {
+    const key = getGroupKey(row);
+    if (!factorMap[key]) {
+      factorMap[key] = [];
+    }
+    const pred = predictions[idx];
+    if (typeof pred === 'number') {
+      factorMap[key].push(pred);
+    }
+  });
+
+  const labels = predefinedGroups
+    ? predefinedGroups.filter(g => factorMap[g] && factorMap[g].length > 0)
+    : Object.keys(factorMap).filter(k => factorMap[k].length > 0);
+
+  const values = labels.map(label => getAverage(factorMap[label]));
+
+  return { labels, values };
 };
 
 
@@ -257,29 +232,19 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoading, erro
             Distribusi Nilai Prediksi per Umur
           </h4>
           {(() => {
-            // Kelompok umur
-            const umurGroups = ['<30', '30-39', '40-49', '50+', 'Tidak Diketahui'];
-            const factorMap: Record<string, number[]> = {};
-            result.inputData.forEach((row, idx) => {
+            const getUmurGroup = (row: PredictionFormData) => {
               const umur = row['Umur Thn'] ?? row['Umur'];
-              let group = 'Tidak Diketahui';
               if (typeof umur === 'number' && !isNaN(umur)) {
-                if (umur < 30) group = '<30';
-                else if (umur < 40) group = '30-39';
-                else if (umur < 50) group = '40-49';
-                else group = '50+';
+                if (umur < 30) return '<30';
+                if (umur < 40) return '30-39';
+                if (umur < 50) return '40-49';
+                return '50+';
               }
-              if (!factorMap[group]) factorMap[group] = [];
-              const pred = result.predictions?.[idx];
-              if (typeof pred === 'number') {
-                factorMap[group].push(pred);
-              }
-            });
-            const labels = umurGroups.filter(g => factorMap[g]);
-            const avgPredictions = labels.map(label => {
-              const arr = factorMap[label];
-              return arr.reduce((a, b) => a + b, 0) / arr.length;
-            });
+              return 'Tidak Diketahui';
+            };
+            const umurGroups = ['<30', '30-39', '40-49', '50+', 'Tidak Diketahui'];
+            const { labels, values: avgPredictions } = groupAndAveragePredictions(result.inputData!, result.predictions!, getUmurGroup, umurGroups);
+
             return (
               <SortedBarChart
                 labels={labels}
@@ -298,17 +263,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoading, erro
             Distribusi Nilai Prediksi per Daerah Asal (Bar Chart)
           </h4>
           {(() => {
-            const factorMap: Record<string, number[]> = {};
-            result.inputData.forEach((row, idx) => {
-              const key = row["Provinsi_Target"] || 'Tidak Diketahui'; // ✅ Gunakan nama provinsi, bukan target
-              if (!factorMap[key]) factorMap[key] = [];
-          factorMap[key].push(result.predictions![idx]);
-            });
-            const labels = Object.keys(factorMap);
-            const avgPredictions = labels.map(label => {
-              const arr = factorMap[label];
-              return arr.reduce((a, b) => a + b, 0) / arr.length;
-            });
+            const { labels, values: avgPredictions } = groupAndAveragePredictions(result.inputData!, result.predictions!, (row) => (row["Provinsi_Target"] as string) || 'Tidak Diketahui');
             return (
               <SortedBarChart
                 labels={labels}
@@ -327,18 +282,16 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoading, erro
           <h4 className="text-lg sm:text-xl font-semibold text-slate-800 dark:text-gray-200 mb-3 sm:mb-4">
             Performa Peserta terhadap Variabel Spesifik
           </h4>
-          <FactorPredictionBarChart
-            data={result.inputData}
-            predictions={result.predictions}
-            factorKey="Status Nikah"
-            title="Status Nikah"
-          />
-          <FactorPredictionBarChart
-            data={result.inputData}
-            predictions={result.predictions}
-            factorKey="Gol/Ruang" // ⬅️ ini sesuai field hasil mapping backend
-            title="Golongan/Ruang"
-          />
+          <div className="space-y-4">
+            {(() => {
+              const { labels, values } = groupAndAveragePredictions(result.inputData!, result.predictions!, (row) => (row["Status Nikah"] as string) || 'Tidak Diketahui');
+              return <SortedBarChart labels={labels} values={values} title="Status Nikah" />;
+            })()}
+            {(() => {
+              const { labels, values } = groupAndAveragePredictions(result.inputData!, result.predictions!, (row) => (row["Gol_Ruang"] as string) || 'Tidak Diketahui');
+              return <SortedBarChart labels={labels} values={values} title="Golongan/Ruang" />;
+            })()}
+          </div>
         </section>
       )}
 
@@ -348,7 +301,12 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoading, erro
           <h4 className="text-lg sm:text-xl font-semibold text-slate-800 dark:text-gray-200 mb-3 sm:mb-4">
             Feature Importance
           </h4>
-          <FeatureImportanceBarChart importance={result.feature_importance} />
+          <SortedBarChart
+            labels={Object.keys(result.feature_importance)}
+            values={Object.values(result.feature_importance)}
+            title="Fitur"
+            horizontal
+          />
         </section>
       )}
 
@@ -359,19 +317,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ result, isLoading, erro
             Kota/Kabupaten dengan Potensi Nilai Terbaik
           </h4>
           {(() => {
-            const factorMap: Record<string, number[]> = {};
-            result.inputData.forEach((row, idx) => {
-              const key = row["Kelahiran Kabupaten/Kota"] || 'Tidak Diketahui';
-              if (!factorMap[key]) factorMap[key] = [];
-              if (result.predictions) {
-                factorMap[key].push(result.predictions[idx]);
-              }
-            });
-            const labels = Object.keys(factorMap);
-            const avgPredictions = labels.map(label => {
-              const arr = factorMap[label];
-              return arr.reduce((a, b) => a + b, 0) / arr.length;
-            });
+            const { labels, values: avgPredictions } = groupAndAveragePredictions(result.inputData!, result.predictions!, (row) => (row["Kelahiran Kabupaten/Kota"] as string) || 'Tidak Diketahui');
             return (
               <SortedBarChart
                 labels={labels}
