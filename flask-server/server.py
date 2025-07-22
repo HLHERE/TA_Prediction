@@ -239,6 +239,9 @@ def preprocess_and_predict(df):
         importance_plot = None
         feature_importance_dict = None
 
+    if 'Gol/Ruang' in df.columns:
+        df.rename(columns={'Gol/Ruang': 'Gol_Ruang'}, inplace=True)
+
     df['Provinsi_Target'] = df['Provinsi_Target_Nama']
     result = {
         'predictions': predictions.tolist(),
